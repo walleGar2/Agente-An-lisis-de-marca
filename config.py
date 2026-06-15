@@ -1,11 +1,25 @@
 """
 config.py
 ---------
-Aqui guardas tu API key en UN SOLO lugar.
-Asi no la copias en cada archivo, y si la cambias, la cambias una sola vez.
-
-IMPORTANTE: cuando subas el proyecto a internet (GitHub), NO subas este archivo
-con la llave real. Mas adelante te muestro como esconderla. Por ahora, local, va bien aqui.
+Lee la API key de forma SEGURA, sin dejarla escrita aqui.
+Por eso este archivo YA se puede subir a GitHub sin riesgo.
 """
 
-GOOGLE_API_KEY = "AQ.Ab8RN6IhTZaObR3FU7ibQb5srW3zz6OQYdMdOBqSjKZH_8sB7w"
+import os
+
+
+def _obtener_api_key():
+    # 1) Streamlit: lee secrets.toml (local) o los Secrets (nube)
+    try:
+        import streamlit as st
+        clave = st.secrets.get("GOOGLE_API_KEY", "")
+        if clave:
+            return clave
+    except Exception:
+        pass
+
+    # 2) Variable de entorno (alternativa, por si corres sin streamlit)
+    return os.environ.get("GOOGLE_API_KEY", "")
+
+
+GOOGLE_API_KEY = _obtener_api_key()
