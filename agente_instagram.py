@@ -1,6 +1,4 @@
 """
-agente_instagram.py
--------------------
 AGENTE DE INSTAGRAM.
 Trae datos publicos de una cuenta de Instagram de empresa usando la API
 oficial de Meta (funcion "Business Discovery"): seguidores, y por cada
