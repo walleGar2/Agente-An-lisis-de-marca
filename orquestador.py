@@ -1,39 +1,32 @@
 """
-orquestador.py
---------------
-Este es el ORQUESTADOR (el "jefe").
-Ahora hace el FLUJO COMPLETO:
+El ORQUESTADOR (el "jefe"). Hace el flujo completo:
   1. Busca empresas candidatas (desambiguador).
   2. Te deja elegir la correcta.
-  3. Analiza a fondo la empresa elegida (investigador), anclada a su sitio web.
+  3. La analiza a fondo: investigacion web + mapa de redes sociales.
 
-La funcion correr_analisis() se queda enfocada en UNA cosa:
-analizar una empresa ya confirmada. Asi sirve igual para la terminal
-y, mas adelante, para Streamlit.
+Cada agente hace UNA cosa; el orquestador solo los coordina y junta el reporte.
 """
 
 from desambiguador import buscar_candidatos
 from agente_investigador import investigar_marca
+from agente_redes import analizar_redes
 
 
 def correr_analisis(empresa, web=None, cuentas=None):
     """
     Analiza a fondo una empresa YA CONFIRMADA.
-    - empresa: nombre de la empresa (texto)
-    - web: sitio web, para anclar el analisis a la empresa correcta
-    - cuentas: cuentas de redes sociales (lo usaremos despues)
-
     Devuelve un reporte final (texto).
     """
 
     print(f"Analizando a fondo: {empresa}...")
 
-    # --- PASO 1: Agente investigador (web publica) ---
+    # --- PASO 1: Investigacion web (noticias, reputacion, competidores) ---
+    print("Investigando en internet...")
     investigacion = investigar_marca(empresa, web)
 
-    # --- PASO 2: Agente de Instagram (aun no conectado) ---
-    # Aqui, mas adelante: datos_redes = analizar_instagram(cuentas)
-    datos_redes = "(El analisis de redes sociales se agregara mas adelante.)"
+    # --- PASO 2: Redes sociales (UN solo agente coordina todo) ---
+    print("Analizando redes sociales...")
+    redes = analizar_redes(empresa, web)
 
     # --- PASO 3: Armar el reporte final ---
     reporte = f"""
@@ -47,36 +40,27 @@ def correr_analisis(empresa, web=None, cuentas=None):
 {investigacion}
 
 --- REDES SOCIALES ---
-{datos_redes}
+{redes}
 """
     return reporte
 
 
 def flujo_completo():
-    """
-    Flujo interactivo para la terminal:
-    nombre -> candidatas -> elegir -> analisis.
-    (Mas adelante, Streamlit hara estos mismos pasos pero con pantalla.)
-    """
+    """Flujo interactivo para la terminal: nombre -> candidatas -> elegir -> analisis."""
 
-    # 1) Pedir el nombre
     nombre = input("Nombre de la empresa a analizar: ").strip()
 
-    # 2) Buscar candidatas
     print("Buscando empresas que coincidan...")
     candidatos = buscar_candidatos(nombre)
 
-    # 3) Si no hay candidatas, avisar y salir
     if not candidatos:
         print("No encontre empresas con ese nombre. Revisa la escritura e intenta de nuevo.")
         return
 
-    # 4) Mostrar las candidatas numeradas
     print("\nEncontre estas empresas:")
     for i, c in enumerate(candidatos, start=1):
         print(f"  {i}. {c.get('nombre')} - {c.get('descripcion')} ({c.get('ubicacion')})")
 
-    # 5) Pedir que elija una (con validacion sencilla)
     try:
         eleccion = int(input("\nElige el numero de la empresa correcta: "))
         elegida = candidatos[eleccion - 1]
@@ -84,11 +68,9 @@ def flujo_completo():
         print("Eleccion no valida. Intenta de nuevo.")
         return
 
-    # 6) Analizar la elegida, pasando su sitio web para anclar el analisis
     reporte = correr_analisis(elegida.get("nombre"), elegida.get("web"))
     print(reporte)
 
 
-# Corre el flujo completo desde la terminal
 if __name__ == "__main__":
     flujo_completo()
